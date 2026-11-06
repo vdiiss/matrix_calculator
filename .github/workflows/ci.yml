@@ -1,0 +1,71 @@
+name: Matrix Calculator CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y cmake g++ doxygen graphviz valgrind
+
+      - name: Check code style (clang-format)
+        run: |
+          pipx run --spec clang-format==18.1.8 clang-format --version
+          pipx run --spec clang-format==18.1.8 clang-format --dry-run --Werror \
+            include/*.h src/*.cpp tests/*.cpp
+
+      - name: Configure CMake
+        run: cmake -B build -DCMAKE_BUILD_TYPE=Debug
+
+      - name: Build
+        run: cmake --build build --parallel $(nproc)
+
+      - name: Run tests
+        run: cd build && ctest --verbose --output-on-failure
+
+      - name: Check memory leaks (tests)
+        run: |
+          valgrind --leak-check=full --error-exitcode=1 \
+            ./build/tests/matrix_tests
+
+      - name: Check memory leaks (application)
+        run: |
+          valgrind --leak-check=full --error-exitcode=1 \
+            ./build/matrix_calculator
+
+      - name: Generate documentation
+        run: doxygen Doxyfile
+
+      - name: Upload documentation
+        uses: actions/upload-artifact@v4
+        with:
+          name: documentation
+          path: docs/html
+
+  docker:
+    runs-on: ubuntu-latest
+    needs: build-and-test
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Build Docker image
+        run: docker build -t matrix-calculator .
+
+      - name: Run container (demo mode)
+        run: docker run --rm matrix-calculator
+
+      - name: Run container (interactive mode)
+        run: |
+          printf '2 3\n1 2 3\n4 5 6\n' | \
+            docker run -i --rm matrix-calculator ./matrix_calculator --interactive
