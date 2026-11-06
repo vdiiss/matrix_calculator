@@ -1,0 +1,18 @@
+# Артефакты сборки
+build/
+out/
+cmake-build-*/
+*.o
+*.a
+*.so
+*.exe
+compile_commands.json
+
+# Сгенерированная документация Doxygen
+docs/html/
+docs/latex/
+
+# IDE и кэш
+.vscode/
+.idea/
+.cache/
