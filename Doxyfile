@@ -37,6 +37,7 @@ SOURCE_BROWSER         = YES
 GENERATE_HTML          = YES
 HTML_OUTPUT            = html
 GENERATE_TREEVIEW      = YES
+HTML_COLORSTYLE        = LIGHT
 GENERATE_LATEX         = NO
 
 #---------------------------------------------------------------------------
@@ -46,7 +47,7 @@ HAVE_DOT               = YES
 CALL_GRAPH             = YES
 CALLER_GRAPH           = YES
 DOT_IMAGE_FORMAT       = svg
-INTERACTIVE_SVG        = YES
+INTERACTIVE_SVG        = NO
 
 #---------------------------------------------------------------------------
 # Предупреждения
